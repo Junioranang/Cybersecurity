@@ -1,0 +1,30 @@
+title: Suspicious Encoded PowerShell Execution
+id: 8f2c1a3e-portfolio-example-0001
+status: experimental
+description: >
+  Detects PowerShell execution using the -EncodedCommand (or -enc) flag,
+  which is commonly used to obscure command content from casual log review
+  and simple string-matching defenses.
+author: junioranang
+date: 2026/09/07
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains:
+      - '-enc '
+      - '-EncodedCommand'
+  condition: selection
+falsepositives:
+  - Legitimate admin scripts that use encoded commands for scheduling or
+    complex quoting (should be allowlisted by known script hash if common)
+level: medium
+tags:
+  - attack.execution
+  - attack.t1059.001
+notes: >
+  This alone is a weak signal — encoded PowerShell is common in legitimate
+  automation. Pair with parent process anomalies (e.g., spawned from Office
+  apps or a browser) to reduce false positives before treating as high severity.
